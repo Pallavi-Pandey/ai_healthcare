@@ -72,32 +72,6 @@ def register_doctor(
     return new_doctor
 
 
-@router.post("/register/admin", response_model=schemas.AdminRead)
-def register_admin(
-    payload: schemas.AdminCreate,
-    db: Session = Depends(get_db),
-    x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token"),
-):
-    # Admin-initiated only (bootstrap first admin via known token)
-    if x_admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=403, detail="Admin token required")
-
-    existing = db.query(models.Admin).filter(models.Admin.email == payload.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Admin with this email already exists")
-
-    new_admin = models.Admin(
-        first_name=payload.first_name,
-        last_name=payload.last_name,
-        phone_number=payload.phone_number,
-        email=payload.email,
-        password_hash=hash_password(payload.password),
-    )
-    db.add(new_admin)
-    db.commit()
-    db.refresh(new_admin)
-    return new_admin
-
 
 @router.post("/login", response_model=schemas.Token)
 def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
