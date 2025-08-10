@@ -2,78 +2,37 @@ from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr
 
-
-# Shared base schemas
-class PatientBase(BaseModel):
+# --- User Schemas ---
+class UserBase(BaseModel):
     first_name: str
     last_name: str
     dob: Optional[date] = None
     phone_number: Optional[str] = None
     email: EmailStr
     address: Optional[str] = None
-
-
-class PatientCreate(PatientBase):
-    password: str
-
-
-class PatientRead(PatientBase):
-    patient_id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class DoctorBase(BaseModel):
-    first_name: str
-    last_name: str
     specialty: Optional[str] = None
-    phone_number: Optional[str] = None
-    email: EmailStr
 
-
-class DoctorCreate(DoctorBase):
+class UserCreate(UserBase):
     password: str
+    role: str = 'patient'
 
-
-class DoctorRead(DoctorBase):
-    doctor_id: int
+class UserRead(UserBase):
+    user_id: int
+    role: str
     created_at: datetime
 
     class Config:
         from_attributes = True
 
-
-class AdminBase(BaseModel):
-    first_name: str
-    last_name: str
-    phone_number: Optional[str] = None
-    email: EmailStr
-
-
-class AdminCreate(AdminBase):
-    password: str
-
-
-class AdminRead(AdminBase):
-    admin_id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
+# --- Other Schemas ---
 class AppointmentBase(BaseModel):
     patient_id: int
     doctor_id: int
     appointment_date: datetime
     status: Optional[str] = None
 
-
 class AppointmentCreate(AppointmentBase):
     pass
-
 
 class AppointmentRead(AppointmentBase):
     appointment_id: int
@@ -81,7 +40,6 @@ class AppointmentRead(AppointmentBase):
 
     class Config:
         from_attributes = True
-
 
 class PrescriptionBase(BaseModel):
     patient_id: int
@@ -92,10 +50,8 @@ class PrescriptionBase(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
-
 class PrescriptionCreate(PrescriptionBase):
     pass
-
 
 class PrescriptionRead(PrescriptionBase):
     prescription_id: int
@@ -104,7 +60,6 @@ class PrescriptionRead(PrescriptionBase):
     class Config:
         from_attributes = True
 
-
 class ReminderBase(BaseModel):
     patient_id: int
     type: str
@@ -112,10 +67,8 @@ class ReminderBase(BaseModel):
     reminder_time: datetime
     status: Optional[str] = None
 
-
 class ReminderCreate(ReminderBase):
     pass
-
 
 class ReminderRead(ReminderBase):
     reminder_id: int
@@ -124,7 +77,6 @@ class ReminderRead(ReminderBase):
     class Config:
         from_attributes = True
 
-
 class CallLogBase(BaseModel):
     patient_id: int
     call_type: Optional[str] = None
@@ -132,10 +84,8 @@ class CallLogBase(BaseModel):
     call_status: Optional[str] = None
     notes: Optional[str] = None
 
-
 class CallLogCreate(CallLogBase):
     pass
-
 
 class CallLogRead(CallLogBase):
     call_id: int
@@ -143,23 +93,19 @@ class CallLogRead(CallLogBase):
     class Config:
         from_attributes = True
 
-
-# Auth helper schemas
+# --- Auth Schemas ---
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
-    role: str  # "patient", "doctor", or "admin"
-
+    role: str
 
 class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
 
-
 class RefreshRequest(BaseModel):
     refresh_token: str
-
 
 class UserInfo(BaseModel):
     role: str
