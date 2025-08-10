@@ -118,3 +118,24 @@ class PatientUpdate(BaseModel):
     dob: Optional[date] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
+
+# Doctor specific schemas
+class DoctorBase(UserBase):
+    specialty: str
+    experience_years: Optional[int] = None
+    consultation_fee: Optional[float] = None
+    available_hours: Optional[dict] = None
+
+class DoctorCreate(DoctorBase):
+    password: str
+    email: EmailStr
+
+class DoctorUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+    specialty: Optional[str] = None
+    experience_years: Optional[int] = None
+    consultation_fee: Optional[float] = None
+    available_hours: Optional[dict] = None
