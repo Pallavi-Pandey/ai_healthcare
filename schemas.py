@@ -25,21 +25,47 @@ class UserRead(UserBase):
         from_attributes = True
 
 # --- Other Schemas ---
+from typing import List, Optional
+from datetime import time
+from pydantic import Field
+
 class AppointmentBase(BaseModel):
     patient_id: int
     doctor_id: int
     appointment_date: datetime
-    status: Optional[str] = None
+    end_date: Optional[datetime] = None
+    status: str = "scheduled"  # scheduled, completed, cancelled, no_show
+    notes: Optional[str] = None
+    reason: Optional[str] = None
 
 class AppointmentCreate(AppointmentBase):
     pass
 
+class AppointmentUpdate(BaseModel):
+    appointment_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
+    reason: Optional[str] = None
+
 class AppointmentRead(AppointmentBase):
     appointment_id: int
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+class AppointmentAvailability(BaseModel):
+    date: date
+    available_slots: List[time]
+
+class AppointmentFilter(BaseModel):
+    patient_id: Optional[int] = None
+    doctor_id: Optional[int] = None
+    status: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
 
 class PrescriptionBase(BaseModel):
     patient_id: int
@@ -110,3 +136,32 @@ class RefreshRequest(BaseModel):
 class UserInfo(BaseModel):
     role: str
     user_id: int
+
+# Patient specific schemas
+class PatientUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    dob: Optional[date] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+
+# Doctor specific schemas
+class DoctorBase(UserBase):
+    specialty: str
+    experience_years: Optional[int] = None
+    consultation_fee: Optional[float] = None
+    available_hours: Optional[dict] = None
+
+class DoctorCreate(DoctorBase):
+    password: str
+    email: EmailStr
+
+class DoctorUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+    specialty: Optional[str] = None
+    experience_years: Optional[int] = None
+    consultation_fee: Optional[float] = None
+    available_hours: Optional[dict] = None

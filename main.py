@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from routes.auth_routes import router as auth_router
+from routes.patient_routes import router as patient_router
+from routes.doctor_routes import router as doctor_router
+from routes.appointment_routes import router as appointment_router
 from database import Base, engine
 
 # Create all tables on startup (simple for initial phase; consider Alembic later)
@@ -39,8 +42,10 @@ def startup_event():
     finally:
         db.close()
 
-app.include_router(auth_router, prefix="/auth", tags=["auth"]) 
-
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(patient_router, tags=["patients"])
+app.include_router(doctor_router, tags=["doctors"])
+app.include_router(appointment_router)
 
 @app.get("/")
 def read_root():

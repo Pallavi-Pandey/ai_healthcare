@@ -1,5 +1,8 @@
 1 register as doctor/patient
-3 login
-4 token
-5 refresh
-6 /me for profile
+2 login
+3 token
+4 refresh
+5 /me for profile
+Get patient profile details
+Update patient profile
+Delete patient account
