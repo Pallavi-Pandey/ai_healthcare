@@ -1,5 +1,4 @@
-1 register as doctor
-2 register as patient	
+1 register as doctor/patient
 3 login
 4 token
 5 refresh
