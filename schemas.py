@@ -110,3 +110,11 @@ class RefreshRequest(BaseModel):
 class UserInfo(BaseModel):
     role: str
     user_id: int
+
+# Patient specific schemas
+class PatientUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    dob: Optional[date] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
