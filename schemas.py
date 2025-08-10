@@ -25,21 +25,47 @@ class UserRead(UserBase):
         from_attributes = True
 
 # --- Other Schemas ---
+from typing import List, Optional
+from datetime import time
+from pydantic import Field
+
 class AppointmentBase(BaseModel):
     patient_id: int
     doctor_id: int
     appointment_date: datetime
-    status: Optional[str] = None
+    end_date: Optional[datetime] = None
+    status: str = "scheduled"  # scheduled, completed, cancelled, no_show
+    notes: Optional[str] = None
+    reason: Optional[str] = None
 
 class AppointmentCreate(AppointmentBase):
     pass
 
+class AppointmentUpdate(BaseModel):
+    appointment_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
+    reason: Optional[str] = None
+
 class AppointmentRead(AppointmentBase):
     appointment_id: int
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+class AppointmentAvailability(BaseModel):
+    date: date
+    available_slots: List[time]
+
+class AppointmentFilter(BaseModel):
+    patient_id: Optional[int] = None
+    doctor_id: Optional[int] = None
+    status: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
 
 class PrescriptionBase(BaseModel):
     patient_id: int
