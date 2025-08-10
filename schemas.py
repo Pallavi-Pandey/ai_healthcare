@@ -45,6 +45,25 @@ class DoctorRead(DoctorBase):
         from_attributes = True
 
 
+class AdminBase(BaseModel):
+    first_name: str
+    last_name: str
+    phone_number: Optional[str] = None
+    email: EmailStr
+
+
+class AdminCreate(AdminBase):
+    password: str
+
+
+class AdminRead(AdminBase):
+    admin_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class AppointmentBase(BaseModel):
     patient_id: int
     doctor_id: int
@@ -129,9 +148,19 @@ class CallLogRead(CallLogBase):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
-    role: str  # "patient" or "doctor"
+    role: str  # "patient", "doctor", or "admin"
 
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class UserInfo(BaseModel):
+    role: str
+    user_id: int
