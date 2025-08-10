@@ -1,20 +1,16 @@
-from fastapi import FastAPI
-from routes.auth_routes import router as auth_router
-from database import Base, engine
+import os
+from database import Base, engine, get_db
+from models import User
+from utils.auth import hash_password
 
-# Create all tables on startup (simple for initial phase; consider Alembic later)
-Base.metadata.create_all(bind=engine)
+def reset_database():
+    print("Dropping all tables...")
+    Base.metadata.drop_all(bind=engine)
+    print("Creating all tables...")
+    Base.metadata.create_all(bind=engine)
+    print("Tables created successfully.")
 
-app = FastAPI(title="Healthcare AI Backend")
-
-
-@app.on_event("startup")
-def startup_event():
-    from database import get_db
-    from models import User
-    from utils.auth import hash_password
-    import os
-
+    # Create the default admin user
     db = next(get_db())
     try:
         admin_email = os.getenv("ADMIN_EMAIL", "admin@example.com")
@@ -39,9 +35,5 @@ def startup_event():
     finally:
         db.close()
 
-app.include_router(auth_router, prefix="/auth", tags=["auth"]) 
-
-
-@app.get("/")
-def read_root():
-    return {"message": "Healthcare AI Backend is running"}
+if __name__ == "__main__":
+    reset_database()
