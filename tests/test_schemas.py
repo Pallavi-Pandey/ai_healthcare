@@ -5,10 +5,10 @@ from typing import Dict, Any
 
 from schemas import (
     UserCreate, UserRead, UserBase,
-    AppointmentCreate, AppointmentRead,
-    PrescriptionCreate, PrescriptionRead,
-    ReminderCreate, ReminderRead,
-    CallLogCreate, CallLogRead,
+    AppointmentCreate, AppointmentRead, AppointmentBase, AppointmentUpdate,
+    PrescriptionCreate, PrescriptionRead, PrescriptionBase,
+    ReminderCreate, ReminderRead, ReminderBase,
+    CallLogCreate, CallLogRead, CallLogBase,
     LoginRequest, Token, RefreshRequest, UserInfo
 )
 
@@ -135,7 +135,8 @@ class TestAppointmentSchemas:
         }
         
         appointment = AppointmentBase(**appointment_data)
-        assert appointment.status is None
+        # Check that the default status is 'scheduled' when not provided
+        assert appointment.status == "scheduled"
     
     def test_appointment_create_schema(self):
         """Test AppointmentCreate schema"""

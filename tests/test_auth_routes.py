@@ -1,75 +1,31 @@
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 import os
+import sys
+from fastapi.testclient import TestClient
+
+# Add the parent directory to the Python path to allow imports from the main application
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from main import app
-from database import Base, get_db
-from models import User
-from utils.auth import hash_password, create_access_token, ADMIN_TOKEN
+from database import get_db
+from utils.auth import create_access_token, ADMIN_TOKEN
 
-# Test database setup
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test_auth.db"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-app.dependency_overrides[get_db] = override_get_db
-
+# Override the database dependency for testing
 @pytest.fixture(scope="function")
-def test_client():
-    """Create test database and client for each test"""
-    Base.metadata.create_all(bind=engine)
+def test_client(db_session):
+    """Create a test client with overridden database session"""
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            pass
+    
+    app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as client:
         yield client
-    Base.metadata.drop_all(bind=engine)
-
-@pytest.fixture
-def sample_patient():
-    """Create a sample patient user"""
-    db = TestingSessionLocal()
-    patient = User(
-        first_name="John",
-        last_name="Doe",
-        email="patient@test.com",
-        password_hash=hash_password("patient123"),
-        role="patient"
-    )
-    db.add(patient)
-    db.commit()
-    db.refresh(patient)
-    db.close()
-    return patient
-
-@pytest.fixture
-def sample_doctor():
-    """Create a sample doctor user"""
-    db = TestingSessionLocal()
-    doctor = User(
-        first_name="Dr. Jane",
-        last_name="Smith",
-        email="doctor@test.com",
-        password_hash=hash_password("doctor123"),
-        role="doctor",
-        specialty="Cardiology"
-    )
-    db.add(doctor)
-    db.commit()
-    db.refresh(doctor)
-    db.close()
-    return doctor
+    
+    # Clear the dependency overrides after the test
+    app.dependency_overrides.clear()
 
 class TestUserRegistration:
     """Test cases for user registration endpoint"""
@@ -132,7 +88,7 @@ class TestUserRegistration:
         user_data = {
             "first_name": "Jane",
             "last_name": "Doe",
-            "email": "patient@test.com",  # Same as sample_patient
+            "email": "patient@example.com",  # Same as sample_patient
             "password": "password123",
             "role": "patient"
         }
@@ -160,8 +116,8 @@ class TestUserLogin:
     def test_login_patient_success(self, test_client, sample_patient):
         """Test successful patient login"""
         login_data = {
-            "email": "patient@test.com",
-            "password": "patient123",
+            "email": "patient@example.com",
+            "password": "testpass123",
             "role": "patient"
         }
         
@@ -176,8 +132,8 @@ class TestUserLogin:
     def test_login_doctor_success(self, test_client, sample_doctor):
         """Test successful doctor login"""
         login_data = {
-            "email": "doctor@test.com",
-            "password": "doctor123",
+            "email": "doctor@example.com",
+            "password": "testpass123",
             "role": "doctor"
         }
         
@@ -191,7 +147,7 @@ class TestUserLogin:
     def test_login_wrong_password(self, test_client, sample_patient):
         """Test login fails with wrong password"""
         login_data = {
-            "email": "patient@test.com",
+            "email": "patient@example.com",
             "password": "wrongpassword",
             "role": "patient"
         }
@@ -203,8 +159,8 @@ class TestUserLogin:
     def test_login_wrong_role(self, test_client, sample_patient):
         """Test login fails with wrong role"""
         login_data = {
-            "email": "patient@test.com",
-            "password": "patient123",
+            "email": "patient@example.com",
+            "password": "testpass123",
             "role": "doctor"  # Wrong role
         }
         
@@ -229,8 +185,8 @@ class TestTokenOperations:
     def test_oauth2_token_endpoint(self, test_client, sample_patient):
         """Test OAuth2 token endpoint"""
         form_data = {
-            "username": "patient@test.com",
-            "password": "patient123"
+            "username": "patient@example.com",
+            "password": "testpass123"
         }
         
         response = test_client.post("/auth/token", data=form_data)
@@ -245,8 +201,8 @@ class TestTokenOperations:
         """Test successful token refresh"""
         # First login to get tokens
         login_data = {
-            "email": "patient@test.com",
-            "password": "patient123",
+            "email": "patient@example.com",
+            "password": "testpass123",
             "role": "patient"
         }
         
@@ -273,8 +229,8 @@ class TestTokenOperations:
         """Test getting current user info with valid token"""
         # Login to get token
         login_data = {
-            "email": "patient@test.com",
-            "password": "patient123",
+            "email": "patient@example.com",
+            "password": "testpass123",
             "role": "patient"
         }
         

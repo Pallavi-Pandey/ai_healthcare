@@ -63,25 +63,37 @@ class TestMainApp:
         assert response.status_code == 200
         assert response.json() == {"message": "Healthcare AI Backend is running"}
     
-    def test_startup_event_creates_admin(self, test_client):
+    def test_startup_event_creates_admin(self, test_client, monkeypatch, db_session):
         """Test that startup event creates default admin user"""
-        # Set environment variables for test
-        os.environ["ADMIN_EMAIL"] = "test_admin@example.com"
-        os.environ["ADMIN_PASSWORD"] = "test_admin_pass"
-        os.environ["ADMIN_FIRST_NAME"] = "Test"
-        os.environ["ADMIN_LAST_NAME"] = "Admin"
+        from main import startup_event
+        from models import User
         
-        # Trigger startup event by making a request
-        response = test_client.get("/")
-        assert response.status_code == 200
+        # Set environment variables for test
+        test_email = "test_admin@example.com"
+        test_password = "test_admin_pass"
+        test_first_name = "Test"
+        test_last_name = "Admin"
+        
+        # Clean up any existing test user
+        existing_user = db_session.query(User).filter(User.email == test_email).first()
+        if existing_user:
+            db_session.delete(existing_user)
+            db_session.commit()
+        
+        # Set environment variables
+        monkeypatch.setenv("ADMIN_EMAIL", test_email)
+        monkeypatch.setenv("ADMIN_PASSWORD", test_password)
+        monkeypatch.setenv("ADMIN_FIRST_NAME", test_first_name)
+        monkeypatch.setenv("ADMIN_LAST_NAME", test_last_name)
+        
+        # Call the startup event handler directly
+        startup_event()
         
         # Verify admin user was created
-        db = TestingSessionLocal()
-        admin_user = db.query(User).filter(User.email == "test_admin@example.com").first()
-        assert admin_user is not None
-        assert admin_user.role == "admin"
-        assert admin_user.first_name == "Test"
-        db.close()
+        admin_user = db_session.query(User).filter(User.email == test_email).first()
+        assert admin_user is not None, f"Admin user with email {test_email} was not created"
+        assert admin_user.role == "admin", f"Expected role 'admin', got '{admin_user.role}'"
+        assert admin_user.first_name == test_first_name, f"Expected first name '{test_first_name}', got '{admin_user.first_name}'"
     
     def test_app_title_and_tags(self, test_client):
         """Test FastAPI app configuration"""

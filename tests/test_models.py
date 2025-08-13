@@ -1,63 +1,13 @@
 import pytest
 from datetime import datetime, date
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+import os
+import sys
 
-from database import Base
+# Add the parent directory to the Python path to allow imports from the main application
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from models import User, Appointment, Prescription, Reminder, CallLog
 from utils.auth import hash_password
-
-# Test database setup
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test_models.db"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-@pytest.fixture(scope="function")
-def db_session():
-    """Create test database session for each test"""
-    Base.metadata.create_all(bind=engine)
-    session = TestingSessionLocal()
-    yield session
-    session.close()
-    Base.metadata.drop_all(bind=engine)
-
-@pytest.fixture
-def sample_patient(db_session):
-    """Create a sample patient user"""
-    patient = User(
-        first_name="John",
-        last_name="Doe",
-        email="john.doe@test.com",
-        password_hash=hash_password("password123"),
-        role="patient",
-        phone_number="1234567890",
-        address="123 Main St, City, State"
-    )
-    db_session.add(patient)
-    db_session.commit()
-    db_session.refresh(patient)
-    return patient
-
-@pytest.fixture
-def sample_doctor(db_session):
-    """Create a sample doctor user"""
-    doctor = User(
-        first_name="Dr. Jane",
-        last_name="Smith",
-        email="jane.smith@test.com",
-        password_hash=hash_password("doctor123"),
-        role="doctor",
-        specialty="Cardiology"
-    )
-    db_session.add(doctor)
-    db_session.commit()
-    db_session.refresh(doctor)
-    return doctor
 
 class TestUserModel:
     """Test cases for User model"""
@@ -110,7 +60,7 @@ class TestUserModel:
         duplicate_user = User(
             first_name="Jane",
             last_name="Doe",
-            email="john.doe@test.com",  # Same email as sample_patient
+            email=sample_patient.email,  # Use the same email as sample_patient
             password_hash=hash_password("password123"),
             role="patient"
         )

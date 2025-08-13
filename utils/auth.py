@@ -26,8 +26,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def _create_token(data: dict, minutes: int) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=minutes)
-    to_encode.update({"exp": expire})
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(minutes=minutes)
+    # Use current timestamp as a simple unique identifier
+    to_encode.update({
+        "iat": now,  # Issued at time
+        "exp": expire,
+        "jti": str(int(now.timestamp() * 1000))  # Use timestamp as unique ID
+    })
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 

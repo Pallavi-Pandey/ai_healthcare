@@ -1,7 +1,11 @@
+import os
+import sys
 import pytest
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
-import os
+
+# Add the parent directory to the Python path to allow imports from the main application
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.auth import (
     hash_password,

@@ -1,29 +1,18 @@
 import pytest
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+import os
+import sys
+from datetime import datetime
+from sqlalchemy import text
 
-from database import Base, get_db
+# Import get_db from the database module
+from database import get_db
+
+# Add the parent directory to the Python path to allow imports from the main application
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from models import User
 
-# Test database setup
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test_database.db"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-@pytest.fixture(scope="function")
-def db_session():
-    """Create test database session for each test"""
-    Base.metadata.create_all(bind=engine)
-    session = TestingSessionLocal()
-    yield session
-    session.close()
-    Base.metadata.drop_all(bind=engine)
-
+# Database session is now provided by conftest.py
 class TestDatabaseConnection:
     """Test cases for database connection and setup"""
     
@@ -204,6 +193,11 @@ class TestDatabaseConstraints:
     def test_foreign_key_constraints(self, db_session):
         """Test foreign key constraints"""
         from models import Appointment
+        from sqlalchemy import text
+        
+        # For SQLite, we need to enable foreign key constraints
+        if 'sqlite' in str(db_session.bind.url):
+            db_session.execute(text('PRAGMA foreign_keys = ON'))
         
         # Try to create appointment with non-existent user IDs
         appointment = Appointment(
@@ -215,8 +209,14 @@ class TestDatabaseConstraints:
         
         db_session.add(appointment)
         
-        with pytest.raises(Exception):  # Should raise foreign key constraint error
+        # The specific exception might vary by database, so we'll catch the general Exception
+        with pytest.raises(Exception) as exc_info:
             db_session.commit()
+        
+        # For SQLite, we should see an IntegrityError for foreign key constraint violation
+        # For other databases, we'll just verify that an exception was raised
+        if 'sqlite' in str(db_session.bind.url):
+            assert 'FOREIGN KEY constraint failed' in str(exc_info.value)
 
 class TestDatabaseTransactions:
     """Test cases for database transactions"""
