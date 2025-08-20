@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from database import get_db
-import models
-import schemas
-from utils.auth import (
+from app.database.base import get_db
+from app.database import models
+from app.schemas import LoginRequest, RefreshRequest, UserInfo  # Import specific schema classes
+from app.utils.auth import (
     hash_password,
     verify_password,
     create_access_token,

@@ -3,7 +3,7 @@ from datetime import date, datetime
 from pydantic import ValidationError
 from typing import Dict, Any
 
-from schemas import (
+from app.schemas import (
     UserCreate, UserRead, UserBase,
     AppointmentCreate, AppointmentRead, AppointmentBase, AppointmentUpdate,
     PrescriptionCreate, PrescriptionRead, PrescriptionBase,

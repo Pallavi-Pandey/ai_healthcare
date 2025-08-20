@@ -7,11 +7,12 @@ import os
 
 # Add the parent directory to the Python path to allow imports from the main application
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from database import Base
-from models import User, Appointment, Prescription, Reminder, CallLog
-from utils.auth import hash_password
+from app.database.base import Base, get_db
+from app.database.models import User, Appointment, Prescription, Reminder, CallLog
+from app.utils.auth import hash_password
 
 # Test database setup
 SQLALCHEMY_DATABASE_URL = "sqlite:///./tests/test_models.db"

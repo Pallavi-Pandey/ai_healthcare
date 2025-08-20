@@ -4,11 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
-from database import get_db
-import models
-import schemas
-from utils.auth import get_current_user
-from .auth_routes import oauth2_scheme
+from app.database.base import get_db
+from app.database import models
+from app.schemas import (
+    AppointmentCreate, 
+    AppointmentUpdate,
+    AppointmentFilter,
+    AppointmentAvailability
+)  # Import specific schema classes
+from app.utils.auth import get_current_user
+from app.routes.auth_routes import oauth2_scheme  # Use absolute import
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
 

@@ -2,11 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
-from database import get_db
-import models
-import schemas
-from utils.auth import get_current_user, ADMIN_TOKEN, hash_password
-from .auth_routes import oauth2_scheme
+from app.database.base import get_db
+from app.database import models
+from app.schemas import (
+    DoctorCreate,
+    DoctorUpdate,
+    UserRead
+)  # Import specific schema classes
+from app.utils.auth import get_current_user, ADMIN_TOKEN, hash_password
+from app.routes.auth_routes import oauth2_scheme  # Use absolute import
 
 router = APIRouter(prefix="/doctors", tags=["doctors"])
 

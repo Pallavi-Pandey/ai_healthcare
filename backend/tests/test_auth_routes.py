@@ -1,14 +1,15 @@
 import pytest
 import os
 import sys
+import os
 from fastapi.testclient import TestClient
 
 # Add the parent directory to the Python path to allow imports from the main application
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from main import app
-from database import get_db
-from utils.auth import create_access_token, ADMIN_TOKEN
+from app.main import app
+from app.database.base import get_db
+from app.utils.auth import create_access_token, ADMIN_TOKEN
 
 # Override the database dependency for testing
 @pytest.fixture(scope="function")

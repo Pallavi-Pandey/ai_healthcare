@@ -2,12 +2,13 @@ import pytest
 from datetime import datetime, date
 import os
 import sys
+import os
 
 # Add the parent directory to the Python path to allow imports from the main application
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from models import User, Appointment, Prescription, Reminder, CallLog
-from utils.auth import hash_password
+from app.database.models import User, Appointment, Prescription, Reminder, CallLog
+from app.utils.auth import hash_password
 
 class TestUserModel:
     """Test cases for User model"""

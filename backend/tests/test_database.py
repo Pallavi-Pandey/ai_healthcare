@@ -1,16 +1,15 @@
 import pytest
 import os
 import sys
+import os
 from datetime import datetime
 from sqlalchemy import text
 
-# Import get_db from the database module
-from database import get_db
-
 # Add the parent directory to the Python path to allow imports from the main application
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from models import User
+from app.database.base import get_db
+from app.database.models import User
 
 # Database session is now provided by conftest.py
 class TestDatabaseConnection:

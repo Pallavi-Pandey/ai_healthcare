@@ -5,9 +5,9 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 
 # Add the parent directory to the Python path to allow imports from the main application
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from utils.auth import (
+from app.utils.auth import (
     hash_password,
     verify_password,
     create_access_token,
